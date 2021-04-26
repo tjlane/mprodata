@@ -230,6 +230,52 @@ def mm(E_0, S, k_cat, K_m):
     return (E_0 * k_cat * S) / (K_m + S)
 
 
+def fit_haldane(v0s, substrate_concs, enzyme_conc):
+    """
+    Non-linear LSQ fit of the Haldane equation:
+    
+        V = (E_0 * k_cat * S) / (K_m + S + S^2 / K_i)
+
+	References
+	----------
+	.[1] Reed et al Bioessays (2010) 32, 422-429.
+
+    Parameters
+    ----------
+    v0s: np.ndarray
+        1D array of the intial velocities
+        
+    substrate_concs: np.ndarray
+        1D array of the initial substrate concentrations, same shape as v0s
+        
+    enzyme_conc: float
+        the total enzyme concentration
+    
+	k4 : bool
+		if True, then the ES2 complex has a turnover rate (k4)
+
+    Returns
+    -------    
+    k_cat : float
+    K_m : float
+    """
+
+    S = np.array(substrate_concs)
+
+    def h_simple(tup):
+        k_cat, K_m, K_i = tup
+        V = (enzyme_conc * k_cat * S) / (K_m + S + np.square(S) / K_i)
+        return V - v0s
+
+    res = optimize.least_squares(h_simple, x0=(1.0, 1.0, 1.0))
+
+    return res['x']
+
+
+def haldane(E_0, S, k_cat, K_m, K_i):
+	V = (E_0 * k_cat * S) / (K_m + S + np.square(S) / K_i)
+	return V
+
 
 if __name__ == '__main__': 
 	ks = KineticsSeries(yaml_string, prefix='./wt')
