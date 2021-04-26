@@ -1,0 +1,241 @@
+
+
+import yaml
+import os
+from pprint import pprint
+
+import numpy as np
+from scipy import optimize
+from scipy.stats import linregress
+
+
+class KineticsSeries:
+    """
+    Organize a set of kinetics data, which are fundamentally sets of 
+    1d timeseries with associated metadata:
+    
+        * E_0: the initial enzyme concentration
+        * S_0: the initial substrate concentration
+        * dt:  the time delay between each data point
+        * cntrl_i: the intensity of a well with no enzyme (S_0 intensity)
+        * blank_i: the intensity of a well with nothing
+        
+    Data are "indexed" by E_0 and S_0 and accessing them in this
+    way is likely to be useful.
+    """
+    
+    def __init__(self, yaml_file, prefix='', sumfxn=np.median):
+        
+        # _datasets is the main "under the hood" data structure
+        # it maps : (protein_conc, substrate_conc) -->
+        #              [ ...,
+        #                { timeseries, dt, cntrl_i, blank_i }, 
+        #                ..., 
+        #              ]
+        self._datasets = {}
+        self._sumfxn = sumfxn
+   
+        if type(yaml_file) is str:
+            yaml_file = open(yaml_file, 'r')
+        self._yaml = yaml.safe_load(yaml_file)
+
+        #pprint(self._yaml)
+        
+        for data_file in self._yaml.keys():
+            print('Loading: %s...' % data_file)
+            self._load_data(os.path.join(prefix, data_file),
+                            np.array(self._yaml[data_file]['p_conc_uM']),
+                            np.array(self._yaml[data_file]['s_conc_uM']),
+                            self._yaml[data_file]['gain'],
+                            np.array(self._yaml[data_file]['blank']),
+                            self._yaml[data_file]['dt_s'],
+                            self._yaml[data_file]['exclude']
+                           )
+        
+        return
+    
+
+    def _load_data(self, file_path, p_conc_uM, s_conc_uM, gain, blank, dt_s, exclude):
+
+        if (len(p_conc_uM) != 12) or (len(s_conc_uM) != 8):
+            raise ValueError('include all 12 cols and 8 rows in data entry!',
+                             len(p_conc_uM), len(s_conc_uM))
+
+        data_block = np.genfromtxt(file_path, delimiter=',').reshape(-1, 8, 12)
+        
+        for i,s in enumerate(s_conc_uM):
+            for j,p in enumerate(p_conc_uM):
+                
+                k = (p, s)
+                if (k in exclude) or (s == -1) or (p == -1) or (p == 0):
+                    continue
+               
+                if 0 in p_conc_uM:
+                    cntrl_idx = int(np.where(p_conc_uM == 0)[0])
+                    cntrl_i   = self._sumfxn(data_block[:,i,cntrl_idx])
+                else:
+                    cntrl_i   = 0.0
+                
+                ts = data_block[:,i,j] / gain
+                if np.any(np.isnan(ts)):
+                    print(p, s, ts)
+                    raise ValueError('nan in data -- did you label them correctly?')
+                
+                entry = {
+                    'timeseries': ts,
+                    'dt':         dt_s,
+                    'cntrl_i':    cntrl_i,
+                    'blank_i':    self._sumfxn(data_block[:,
+                                                          int(blank[0])-1,
+                                                          int(blank[1])-1]),
+                }
+                
+                if k in self._datasets.keys():
+                    self._datasets[k].append(entry)
+                else:
+                    self._datasets[k] = [entry]
+
+        return
+    
+    
+    @property
+    def protein_concs(self):
+        return np.unique([item[0] for item in self._datasets.keys()])
+    
+    
+    @property
+    def substrate_concs(self):
+        return np.unique([item[1] for item in self._datasets.keys()])
+    
+    
+    @property
+    def all_conditions(self):
+        """
+        (protein, substrate)
+        """
+        return list(self._datasets.keys())
+
+    
+    def get(self, prot_c, subs_c):
+        """
+        Returns
+        -------         
+        timeseries : np.ndarray
+            time series data
+            
+        dt : float
+            the time spacing, in seconds
+            
+        cntrl_i : float
+            the relevant control intensity
+
+        blank_i : float
+            relevant blank intensity
+        """
+        k = (prot_c, subs_c)
+        if k in self._datasets.keys():
+            ret = self._datasets[k]
+        else:
+            raise KeyError(k, 'not in dataset')
+        return ret
+
+
+def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=50):
+    """
+    Given a 1-d numpy array that represents fluorescence-vs-time,
+    fit a line to the initial (linear) part of the time series.
+    
+    Parameters
+    ----------
+    timeseries : np.ndarray
+        time series data
+
+    dt : float
+        the time spacing, in seconds
+
+    cntrl_i : float
+        the relevant control intensity
+
+    blank_i : float
+        relevant blank intensity
+        
+    fit_region : int
+        the first N data points to fit (linear region)
+        
+    Returns
+    -------
+    v0 : float
+        the initial velocity, in s-1
+        
+    b : float
+        the intercept from the fit
+        
+    stderr_v0 : float
+        the error on v0
+        
+    r2 : float 
+        the R-squared of the linear fit
+    """
+    
+    N = len(timeseries)
+    x = np.arange(N) * dt
+
+    v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
+    if (r ** 2) < 0.9:
+        print('WARNING: high R^2 =', r**2)
+        
+    snr = v0 / stderr_v0
+    if snr < 10.0:
+        print('WARNING: high SNR =', snr)
+    
+    return v0, b, stderr_v0, r**2
+    
+
+def fit_mm(v0s, substrate_concs, enzyme_conc):
+    """
+    Non-linear LSQ fit of the Michaelis-Mentin equation:
+    
+        V = (E_0 * k_cat * S) / (K_m + S)
+    
+    Parameters
+    ----------
+    v0s: np.ndarray
+        1D array of the intial velocities
+        
+    substrate_concs: np.ndarray
+        1D array of the initial substrate concentrations, same shape as v0s
+        
+    enzyme_conc: float
+        the total enzyme concentration
+    
+    Returns
+    -------    
+    k_cat : float
+    K_m : float
+    """
+    
+    S = np.array(substrate_concs)
+    
+    def mm(tup):
+        k_cat, K_m = tup
+        V = (enzyme_conc * k_cat * S) / (K_m + S)
+        return V - v0s
+    
+    res = optimize.least_squares(mm, x0=(1.0, 1.0))
+    
+    return res['x']
+
+
+def mm(E_0, S, k_cat, K_m):
+    return (E_0 * k_cat * S) / (K_m + S)
+
+
+
+if __name__ == '__main__': 
+	ks = KineticsSeries(yaml_string, prefix='./wt')
+
+	print(ks.protein_concs)
+	print(ks.substrate_concs)
+	print(ks.all_conditions)
+	print(ks.get(2.0, 160.0))
+
