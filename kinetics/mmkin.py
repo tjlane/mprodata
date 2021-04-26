@@ -43,14 +43,17 @@ class KineticsSeries:
         
         for data_file in self._yaml.keys():
             print('Loading: %s...' % data_file)
-            self._load_data(os.path.join(prefix, data_file),
-                            np.array(self._yaml[data_file]['p_conc_uM']),
-                            np.array(self._yaml[data_file]['s_conc_uM']),
-                            self._yaml[data_file]['gain'],
-                            np.array(self._yaml[data_file]['blank']),
-                            self._yaml[data_file]['dt_s'],
-                            self._yaml[data_file]['exclude']
-                           )
+            if self._yaml[data_file]['exclude'] == 'all':
+                print(' ... excluded')
+            else:
+                self._load_data(os.path.join(prefix, data_file),
+                                np.array(self._yaml[data_file]['p_conc_uM']),
+                                np.array(self._yaml[data_file]['s_conc_uM']),
+                                self._yaml[data_file]['gain'],
+                                np.array(self._yaml[data_file]['blank']),
+                                self._yaml[data_file]['dt_s'],
+                                self._yaml[data_file]['exclude']
+                               )
         
         return
     
@@ -67,7 +70,9 @@ class KineticsSeries:
             for j,p in enumerate(p_conc_uM):
                 
                 k = (p, s)
-                if (k in exclude) or (s == -1) or (p == -1) or (p == 0):
+
+                # -1 is no data, 0 means no protein (control)
+                if (s == -1) or (p == -1) or (p == 0):
                     continue
                
                 if 0 in p_conc_uM:
@@ -80,14 +85,19 @@ class KineticsSeries:
                 if np.any(np.isnan(ts)):
                     print(p, s, ts)
                     raise ValueError('nan in data -- did you label them correctly?')
-                
+              
+                if [i+1, j+1] in exclude:
+                    print(' ... excluding E=%.2f / S=%.2f' % (p, s))
+                    exclude_entry = True
+                else:
+                    exclude_entry = False
+
                 entry = {
                     'timeseries': ts,
                     'dt':         dt_s,
                     'cntrl_i':    cntrl_i,
-                    'blank_i':    self._sumfxn(data_block[:,
-                                                          int(blank[0])-1,
-                                                          int(blank[1])-1]),
+                    'blank_i':    self._sumfxn(data_block[:,int(blank[0])-1,int(blank[1])-1]),
+                    'exclude':    exclude_entry,
                 }
                 
                 if k in self._datasets.keys():
@@ -115,6 +125,14 @@ class KineticsSeries:
         """
         return list(self._datasets.keys())
 
+
+    def fit_v0(self):
+        for k in self.all_conditions:
+            for e in self.get(*k):
+                v0, b, stderr_v0, r2 = fit_linear_v0(**e)
+                e['v0'] = v0
+        return
+
     
     def get(self, prot_c, subs_c):
         """
@@ -140,7 +158,33 @@ class KineticsSeries:
         return ret
 
 
-def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=50):
+    def get_v0s(self, prot_c, subs_c):
+        
+        v0s = []
+        for e in self.get(prot_c, subs_c):
+            if 'v0' in e.keys():
+                v0s.append(e['v0'])
+
+        return np.array(v0s)
+
+
+    def get_set_v0s(self, prot_c, subc_concentrations):
+        """
+        get all for one protein conc
+        """
+
+        ss  = []
+        v0s = []
+
+        for s in subc_concentrations:
+            v = self.get_v0s(prot_c, s)
+            ss.extend( [s,] * len(v) )
+            v0s.extend(v)
+
+        return np.array(ss), np.array(v0s)
+
+
+def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=15, **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
     fit a line to the initial (linear) part of the time series.
@@ -181,12 +225,12 @@ def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=50):
     x = np.arange(N) * dt
 
     v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
-    if (r ** 2) < 0.9:
-        print('WARNING: high R^2 =', r**2)
+    #if (r ** 2) < 0.9:
+    #    print('WARNING: high R^2 =', r**2)
         
     snr = v0 / stderr_v0
-    if snr < 10.0:
-        print('WARNING: high SNR =', snr)
+    #if snr < 10.0:
+    #    print('WARNING: high SNR =', snr)
     
     return v0, b, stderr_v0, r**2
     
@@ -267,7 +311,8 @@ def fit_haldane(v0s, substrate_concs, enzyme_conc):
         V = (enzyme_conc * k_cat * S) / (K_m + S + np.square(S) / K_i)
         return V - v0s
 
-    res = optimize.least_squares(h_simple, x0=(1.0, 1.0, 1.0))
+    res = optimize.least_squares(h_simple, x0=(0.01, 10.0, 1.0),
+             bounds=([0.0,]*3, [np.inf,]*3) )
 
     return res['x']
 
