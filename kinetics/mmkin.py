@@ -162,7 +162,7 @@ class KineticsSeries:
         
         v0s = []
         for e in self.get(prot_c, subs_c):
-            if 'v0' in e.keys():
+            if 'v0' in e.keys() and (not e['exclude']):
                 v0s.append(e['v0'])
 
         return np.array(v0s)
@@ -177,6 +177,7 @@ class KineticsSeries:
         v0s = []
 
         for s in subc_concentrations:
+
             v = self.get_v0s(prot_c, s)
             ss.extend( [s,] * len(v) )
             v0s.extend(v)
