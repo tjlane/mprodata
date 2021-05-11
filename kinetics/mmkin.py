@@ -72,7 +72,7 @@ class KineticsSeries:
                 k = (p, s)
 
                 # -1 is no data, 0 means no protein (control)
-                if (s == -1) or (p == -1) or (p == 0):
+                if (s == -1) or (p == -1): #or (p == 0):
                     continue
                
                 if 0 in p_conc_uM:
@@ -126,11 +126,27 @@ class KineticsSeries:
         return list(self._datasets.keys())
 
 
-    def fit_v0(self):
+    def fit_v0(self, r2_threshold=0.0, corrections=None):
+
         for k in self.all_conditions:
             for e in self.get(*k):
+
                 v0, b, stderr_v0, r2 = fit_linear_v0(**e)
-                e['v0'] = v0
+                e['v0']        = v0
+                e['b']         = b
+                e['stderr_v0'] = stderr_v0
+                e['r2']        = r2
+
+                if corrections:
+                    if k[1] in corrections.keys(): # keyed by [S]
+                        e['v0'] += corrections[ k[1] ]
+
+                if r2 < r2_threshold:
+                    e['exclude'] = True
+
+                if e['v0'] < 0.0:
+                    e['exclude'] = True
+
         return
 
     
@@ -168,24 +184,28 @@ class KineticsSeries:
         return np.array(v0s)
 
 
-    def get_set_v0s(self, prot_c, subc_concentrations):
+    def get_set_v0s(self, prot_cs, subs_cs):
         """
         get all for one protein conc
         """
 
         ss  = []
+        ps  = []
         v0s = []
 
-        for s in subc_concentrations:
+        for i,s in enumerate(subs_cs):
+            for j,p in enumerate(prot_cs):
 
-            v = self.get_v0s(prot_c, s)
-            ss.extend( [s,] * len(v) )
-            v0s.extend(v)
+                v = self.get_v0s(p, s)
+                ss.extend( [s,] * len(v) )
+                ps.extend( [p,] * len(v) )
+                v0s.extend(v)
 
-        return np.array(ss), np.array(v0s)
+        return np.array(ss), np.array(ps), np.array(v0s)
 
 
-def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=15, **kwargs):
+def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, max_region=1024, min_region=8,
+                  **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
     fit a line to the initial (linear) part of the time series.
@@ -224,16 +244,20 @@ def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, cntrl_i=0.0, fit_region=15, *
     
     N = len(timeseries)
     x = np.arange(N) * dt
+    regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8])
 
+    r2s = []
+    for fit_region in regions:
+
+        v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
+        r2s.append( r ** 2 )
+
+    best = np.argmax(r2s)
+    fit_region = regions[best]
     v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
-    #if (r ** 2) < 0.9:
-    #    print('WARNING: high R^2 =', r**2)
-        
-    snr = v0 / stderr_v0
-    #if snr < 10.0:
-    #    print('WARNING: high SNR =', snr)
-    
-    return v0, b, stderr_v0, r**2
+    r2 = r ** 2
+
+    return v0, b, stderr_v0, r2
     
 
 def fit_mm(v0s, substrate_concs, enzyme_conc):
@@ -306,10 +330,11 @@ def fit_haldane(v0s, substrate_concs, enzyme_conc):
     """
 
     S = np.array(substrate_concs)
+    E = np.array(enzyme_conc)
 
     def h_simple(tup):
         k_cat, K_m, K_i = tup
-        V = (enzyme_conc * k_cat * S) / (K_m + S + np.square(S) / K_i)
+        V = (E * k_cat * S) / (K_m + S + np.square(S) / K_i)
         return V - v0s
 
     res = optimize.least_squares(h_simple, x0=(0.01, 10.0, 1.0),
