@@ -126,10 +126,12 @@ class KineticsSeries:
         return list(self._datasets.keys())
 
 
-    def fit_v0(self, r2_threshold=0.0, corrections=None):
+    def fit_v0(self, r2_threshold=0.0, corrections=None, **kwargs):
 
         for k in self.all_conditions:
             for e in self.get(*k):
+
+                e.update(kwargs)
 
                 v0, b, stderr_v0, r2 = fit_linear_v0(**e)
                 e['v0']        = v0
@@ -204,7 +206,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s)
 
 
-def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, max_region=1024, min_region=8,
+def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, regions=None,
                   **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
@@ -224,8 +226,9 @@ def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, max_region=1024, min_region=8
     blank_i : float
         relevant blank intensity
         
-    fit_region : int
-        the first N data points to fit (linear region)
+    regions : int or list of ints
+        the first N data points to fit (linear region), if None
+        or list will scan a set an choose the best
         
     Returns
     -------
@@ -244,7 +247,15 @@ def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, max_region=1024, min_region=8
     
     N = len(timeseries)
     x = np.arange(N) * dt
-    regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8])
+
+    if regions is None:
+        regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8])
+    elif type(regions) is int:
+        regions = [regions]
+    elif type(regions) is list:
+        pass
+    else:
+        raise TypeError()
 
     r2s = []
     for fit_region in regions:

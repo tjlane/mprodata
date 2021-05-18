@@ -14,8 +14,8 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:
-   - [7, 2]
+  exclude:   []
+#   - [7, 2]
 
 210430_20_10_5_and_2µM_MproS284A.csv:
   p_conc_uM: [-1, -1, -1, -1, 20.0, 10.0, 5.0, 2.0, -1, -1, -1, -1]
@@ -23,8 +23,8 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:
-   - [7, 7]
+  exclude:   []
+#   - [7, 7]
 
 210507_buffer_20µM_MproWT_N_Q_S.csv:
   p_conc_uM: [0.0, -1,  -1, -1, 20.0, -1, -1, -1, -1, -1, -1, -1]
@@ -32,7 +32,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'
   
 210507_10µM_MproWT_N_Q_S.csv:
   p_conc_uM: [-1, -1,  -1, -1, -1, -1, -1, -1, 10.0, -1, -1, -1]
@@ -40,4 +40,4 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'

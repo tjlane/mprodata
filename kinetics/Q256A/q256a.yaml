@@ -21,7 +21,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   'all'
+  exclude:   []
 
 210428_5_and_2µM_Q256A.csv:
   p_conc_uM: [-1, -1, -1, -1, -1, -1, 5.0, 2.0, -1, -1, -1, -1]
@@ -37,7 +37,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'
 
 210507_10µM_MproWT_N_Q_S.csv:
   p_conc_uM: [-1, -1,  -1, -1, -1, -1, -1, 10.0, -1, -1, -1, -1]
@@ -45,4 +45,4 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'

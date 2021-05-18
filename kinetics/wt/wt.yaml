@@ -37,8 +37,8 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1429.0
-  exclude:
-   - [5,1]
+  exclude:   'all'
+#   - [5,1]
 
 210420_10µM_MproWT.csv:
   p_conc_uM: [-1, 10.0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
@@ -79,7 +79,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'
 
 210507_10µM_MproWT_N_Q_S.csv:
   p_conc_uM: [-1, -1,  -1, -1, -1, 10.0, -1, -1, -1, -1, -1, -1]
@@ -87,4 +87,4 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   'all'

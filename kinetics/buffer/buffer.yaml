@@ -6,7 +6,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1517.0
-  exclude:   []
+  exclude:   'all'
 
 210430_buffer_160_80_and_40µM_MproWT.csv:
   p_conc_uM: [0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
