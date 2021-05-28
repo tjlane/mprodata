@@ -1,0 +1,305 @@
+* Block Type = 96-Well 0.1-mL Block
+* Calibration Background is expired  = No
+* Calibration Background performed on = 09-19-2020
+* Calibration Pure Dye ABY is expired = No
+* Calibration Pure Dye ABY performed on = 09-19-2020
+* Calibration Pure Dye FAM is expired = No
+* Calibration Pure Dye FAM performed on = 09-19-2020
+* Calibration Pure Dye JUN is expired = No
+* Calibration Pure Dye JUN performed on = 09-19-2020
+* Calibration Pure Dye NED is expired = No
+* Calibration Pure Dye NED performed on = 09-19-2020
+* Calibration Pure Dye ROX is expired = No
+* Calibration Pure Dye ROX performed on = 09-19-2020
+* Calibration Pure Dye SYBR is expired = No
+* Calibration Pure Dye SYBR performed on = 09-19-2020
+* Calibration Pure Dye TAMRA is expired = No
+* Calibration Pure Dye TAMRA performed on = 09-19-2020
+* Calibration Pure Dye VIC is expired = No
+* Calibration Pure Dye VIC performed on = 09-19-2020
+* Calibration ROI is expired  = No
+* Calibration ROI performed on = 09-19-2020
+* Calibration Uniformity is expired  = No
+* Calibration Uniformity performed on = 09-19-2020
+* Chemistry = SYBR_GREEN
+* Date Created = 2021-05-21 14:03:34 PM CEST
+* Experiment Barcode = 
+* Experiment Comment = NA
+* Experiment File Name = C:\Users\creonann\Desktop\Anne\Thermal_melt\results\mpro_N214A_Q256A_and_S284A_thermal_melt.eds
+* Experiment Name = 2021-05-12_110813
+* Experiment Run End Time = 2021-05-21 13:55:31 PM CEST
+* Experiment Type = Melt Curve
+* Instrument Name =       272312463
+* Instrument Serial Number = 272312463
+* Instrument Type = QuantStudio™ 3 System
+* Passive Reference = 
+* Post-read Stage/Step = 
+* Pre-read Stage/Step = 
+* Quantification Cycle Method = Ct
+* Signal Smoothing On = true
+* Stage where Melt Analysis is performed = Stage2
+* Stage/ Cycle where Ct Analysis is performed = Stage0, Step0
+* User Name = creon
+
+[Melt Curve Result]
+Well	Well Position	Sample	Target Name	Tm	Melt Peak Height
+4	A4	control	Target 1	43.911	1,064.121
+5	A5	control	Target 1	42.293	1,241.647
+6	A6	control	Target 1	55.110	1,276.463
+7	A7	control	Target 1	25.871	1,141.799
+8	A8	control	Target 1	39.883	1,422.172
+9	A9	control	Target 1	42.098	1,335.408
+10	A10	control	Target 1	83.751	1,917.790
+10	A10	control	Target 1	87.123	1,999.375
+10	A10	control	Target 1	93.465	2,024.722
+10	A10	control	Target 1	71.124	1,162.977
+10	A10	control	Target 1	79.866	1,686.845
+11	A11	control	Target 1	87.439	2,551.150
+11	A11	control	Target 1	72.735	2,656.603
+11	A11	control	Target 1	78.628	2,355.086
+11	A11	control	Target 1	82.976	2,320.705
+11	A11	control	Target 1	40.751	527.951
+12	A12	control	Target 1	92.760	2,691.337
+12	A12	control	Target 1	61.749	1,375.726
+12	A12	control	Target 1	89.613	3,176.762
+12	A12	control	Target 1	85.894	2,754.195
+12	A12	control	Target 1	82.862	3,021.988
+16	B4	MproN214A 100 uM	Target 1	59.214	3,155.588
+17	B5	MproN214A 100 uM	Target 1	84.234	4,061.622
+18	B6	MproN214A 100 uM	Target 1	62.663	2,657.223
+19	B7	MproQ256A 100 uM	Target 1	65.563	3,324.467
+20	B8	MproQ256A 100 uM	Target 1	86.554	2,567.267
+21	B9	MproQ256A 100 uM	Target 1	89.065	2,704.203
+22	B10	MproS284A 100 uM	Target 1	84.094	2,191.690
+23	B11	MproS284A 100 uM	Target 1	89.327	2,824.572
+24	B12	MproS284A 100 uM	Target 1	59.747	2,627.045
+28	C4	MproN214A 50 uM	Target 1	53.675	-8,323.178
+28	C4	MproN214A 50 uM	Target 1	85.993	3,476.137
+28	C4	MproN214A 50 uM	Target 1	69.948	-1,081.328
+28	C4	MproN214A 50 uM	Target 1	66.408	-69.192
+28	C4	MproN214A 50 uM	Target 1	63.268	230.731
+29	C5	MproN214A 50 uM	Target 1	54.366	-8,473.092
+29	C5	MproN214A 50 uM	Target 1	31.078	760.444
+29	C5	MproN214A 50 uM	Target 1	29.533	731.049
+29	C5	MproN214A 50 uM	Target 1	64.494	1,027.786
+29	C5	MproN214A 50 uM	Target 1	34.969	641.334
+30	C6	MproN214A 50 uM	Target 1	54.366	-7,085.948
+30	C6	MproN214A 50 uM	Target 1	66.782	1,089.286
+30	C6	MproN214A 50 uM	Target 1	81.144	4,653.864
+30	C6	MproN214A 50 uM	Target 1	82.403	4,629.895
+30	C6	MproN214A 50 uM	Target 1	34.626	333.867
+31	C7	MproQ256A 50 uM	Target 1	86.210	3,008.744
+32	C8	MproQ256A 50 uM	Target 1	85.867	3,914.027
+33	C9	MproQ256A 50 uM	Target 1	84.608	3,560.094
+34	C10	MproS284A 50 uM	Target 1	83.923	2,096.765
+35	C11	MproS284A 50 uM	Target 1	79.028	2,082.226
+36	C12	MproS284A 50 uM	Target 1	80.173	2,358.446
+40	D4	MproN214A 25 uM	Target 1	81.197	8,143.877
+40	D4	MproN214A 25 uM	Target 1	84.737	6,700.814
+40	D4	MproN214A 25 uM	Target 1	66.636	-3,265.387
+40	D4	MproN214A 25 uM	Target 1	35.403	186.825
+40	D4	MproN214A 25 uM	Target 1	26.553	173.209
+41	D5	MproN214A 25 uM	Target 1	75.937	143.099
+41	D5	MproN214A 25 uM	Target 1	63.921	1,771.395
+41	D5	MproN214A 25 uM	Target 1	72.847	2,492.546
+41	D5	MproN214A 25 uM	Target 1	80.629	1,364.123
+41	D5	MproN214A 25 uM	Target 1	60.145	-370.394
+42	D6	MproN214A 25 uM	Target 1	75.308	2,350.530
+42	D6	MproN214A 25 uM	Target 1	71.932	1,415.501
+42	D6	MproN214A 25 uM	Target 1	65.867	882.864
+42	D6	MproN214A 25 uM	Target 1	68.442	868.379
+42	D6	MproN214A 25 uM	Target 1	77.482	722.144
+43	D7	MproQ256A 25 uM	Target 1	86.496	5,105.984
+43	D7	MproQ256A 25 uM	Target 1	79.004	162.201
+43	D7	MproQ256A 25 uM	Target 1	58.414	-7,985.508
+43	D7	MproQ256A 25 uM	Target 1	63.962	-297.417
+43	D7	MproQ256A 25 uM	Target 1	68.080	3,119.505
+44	D8	MproQ256A 25 uM	Target 1	74.428	542.473
+44	D8	MproQ256A 25 uM	Target 1	68.766	-1,069.123
+44	D8	MproQ256A 25 uM	Target 1	58.414	-5,418.470
+44	D8	MproQ256A 25 uM	Target 1	79.004	1,445.623
+44	D8	MproQ256A 25 uM	Target 1	88.212	5,274.546
+45	D9	MproQ256A 25 uM	Target 1	72.095	4,420.473
+45	D9	MproQ256A 25 uM	Target 1	75.352	4,450.104
+45	D9	MproQ256A 25 uM	Target 1	67.353	-423.498
+45	D9	MproQ256A 25 uM	Target 1	61.868	-6,210.737
+45	D9	MproQ256A 25 uM	Target 1	79.980	5,069.103
+46	D10	MproS284A 25 uM	Target 1	80.552	5,110.867
+47	D11	MproS284A 25 uM	Target 1	78.800	3,759.289
+48	D12	MproS284A 25 uM	Target 1	85.608	3,980.499
+52	E4	MproN214A 12.5 uM	Target 1	61.897	-372.785
+52	E4	MproN214A 12.5 uM	Target 1	58.757	-894.293
+52	E4	MproN214A 12.5 uM	Target 1	67.493	1,113.080
+52	E4	MproN214A 12.5 uM	Target 1	82.453	5,199.797
+52	E4	MproN214A 12.5 uM	Target 1	84.737	5,744.448
+53	E5	MproN214A 12.5 uM	Target 1	88.640	7,426.876
+53	E5	MproN214A 12.5 uM	Target 1	77.082	4,988.555
+53	E5	MproN214A 12.5 uM	Target 1	84.005	6,666.560
+53	E5	MproN214A 12.5 uM	Target 1	80.171	5,945.716
+53	E5	MproN214A 12.5 uM	Target 1	92.187	6,292.579
+54	E6	MproN214A 12.5 uM	Target 1	91.043	10,232.216
+54	E6	MproN214A 12.5 uM	Target 1	60.545	1,354.925
+54	E6	MproN214A 12.5 uM	Target 1	89.155	7,807.615
+54	E6	MproN214A 12.5 uM	Target 1	65.409	1,279.043
+54	E6	MproN214A 12.5 uM	Target 1	76.109	5,315.688
+55	E7	MproQ256A 12.5 uM	Target 1	85.638	7,405.002
+55	E7	MproQ256A 12.5 uM	Target 1	82.779	5,836.781
+55	E7	MproQ256A 12.5 uM	Target 1	94.103	6,410.445
+55	E7	MproQ256A 12.5 uM	Target 1	79.461	5,336.113
+55	E7	MproQ256A 12.5 uM	Target 1	75.744	5,431.649
+56	E8	MproQ256A 12.5 uM	Target 1	58.929	-2,956.726
+56	E8	MproQ256A 12.5 uM	Target 1	62.303	-3,702.252
+56	E8	MproQ256A 12.5 uM	Target 1	87.755	6,576.522
+56	E8	MproQ256A 12.5 uM	Target 1	65.735	1,754.129
+56	E8	MproQ256A 12.5 uM	Target 1	74.943	4,293.787
+57	E9	MproQ256A 12.5 uM	Target 1	93.522	10,819.812
+57	E9	MproQ256A 12.5 uM	Target 1	88.722	9,133.498
+57	E9	MproQ256A 12.5 uM	Target 1	69.867	3,959.777
+57	E9	MproQ256A 12.5 uM	Target 1	65.924	3,035.322
+57	E9	MproQ256A 12.5 uM	Target 1	85.466	6,610.983
+58	E10	MproS284A 12.5 uM	Target 1	76.152	5,580.766
+58	E10	MproS284A 12.5 uM	Target 1	89.979	6,925.962
+58	E10	MproS284A 12.5 uM	Target 1	80.380	6,849.188
+58	E10	MproS284A 12.5 uM	Target 1	92.265	4,837.723
+58	E10	MproS284A 12.5 uM	Target 1	84.266	8,536.481
+59	E11	MproS284A 12.5 uM	Target 1	59.403	-4,669.864
+59	E11	MproS284A 12.5 uM	Target 1	85.151	6,800.825
+59	E11	MproS284A 12.5 uM	Target 1	81.374	5,903.881
+59	E11	MproS284A 12.5 uM	Target 1	76.854	4,853.813
+59	E11	MproS284A 12.5 uM	Target 1	88.069	6,436.949
+60	E12	MproS284A 12.5 uM	Target 1	65.869	2,833.081
+60	E12	MproS284A 12.5 uM	Target 1	72.277	6,313.226
+60	E12	MproS284A 12.5 uM	Target 1	69.016	265.669
+60	E12	MproS284A 12.5 uM	Target 1	90.415	6,901.902
+60	E12	MproS284A 12.5 uM	Target 1	61.120	-3,843.639
+64	F4	MproN214A 6.25 uM	Target 1	71.433	2,463.792
+64	F4	MproN214A 6.25 uM	Target 1	92.788	2,463.459
+64	F4	MproN214A 6.25 uM	Target 1	85.765	2,203.500
+64	F4	MproN214A 6.25 uM	Target 1	90.047	2,320.677
+64	F4	MproN214A 6.25 uM	Target 1	79.084	2,462.627
+65	F5	MproN214A 6.25 uM	Target 1	59.630	1,288.524
+65	F5	MproN214A 6.25 uM	Target 1	69.929	5,832.687
+65	F5	MproN214A 6.25 uM	Target 1	65.066	2,950.011
+65	F5	MproN214A 6.25 uM	Target 1	75.136	4,752.388
+65	F5	MproN214A 6.25 uM	Target 1	89.841	5,324.042
+66	F6	MproN214A 6.25 uM	Target 1	75.422	5,309.848
+66	F6	MproN214A 6.25 uM	Target 1	93.389	4,255.550
+66	F6	MproN214A 6.25 uM	Target 1	62.491	767.629
+66	F6	MproN214A 6.25 uM	Target 1	86.237	5,203.302
+66	F6	MproN214A 6.25 uM	Target 1	89.612	4,584.283
+67	F7	MproQ256A 6.25 uM	Target 1	87.526	5,736.811
+67	F7	MproQ256A 6.25 uM	Target 1	74.543	4,911.731
+67	F7	MproQ256A 6.25 uM	Target 1	92.159	5,329.217
+67	F7	MproQ256A 6.25 uM	Target 1	67.737	3,272.836
+67	F7	MproQ256A 6.25 uM	Target 1	80.434	4,794.787
+68	F8	MproQ256A 6.25 uM	Target 1	63.104	2,471.627
+68	F8	MproQ256A 6.25 uM	Target 1	74.829	4,982.004
+68	F8	MproQ256A 6.25 uM	Target 1	70.253	4,102.275
+68	F8	MproQ256A 6.25 uM	Target 1	73.914	4,307.391
+68	F8	MproQ256A 6.25 uM	Target 1	67.394	2,326.167
+69	F9	MproQ256A 6.25 uM	Target 1	90.837	5,828.852
+69	F9	MproQ256A 6.25 uM	Target 1	93.236	4,857.886
+69	F9	MproQ256A 6.25 uM	Target 1	63.810	1,258.424
+69	F9	MproQ256A 6.25 uM	Target 1	77.923	5,337.359
+69	F9	MproQ256A 6.25 uM	Target 1	81.009	6,000.424
+70	F10	MproS284A 6.25 uM	Target 1	92.036	4,651.855
+70	F10	MproS284A 6.25 uM	Target 1	87.465	4,538.422
+70	F10	MproS284A 6.25 uM	Target 1	70.895	4,670.004
+70	F10	MproS284A 6.25 uM	Target 1	89.237	4,380.209
+70	F10	MproS284A 6.25 uM	Target 1	76.495	4,804.933
+71	F11	MproS284A 6.25 uM	Target 1	93.847	4,231.539
+71	F11	MproS284A 6.25 uM	Target 1	73.135	4,450.160
+71	F11	MproS284A 6.25 uM	Target 1	88.469	4,289.834
+71	F11	MproS284A 6.25 uM	Target 1	77.026	4,493.629
+71	F11	MproS284A 6.25 uM	Target 1	68.215	2,933.766
+72	F12	MproS284A 6.25 uM	Target 1	69.645	2,935.978
+72	F12	MproS284A 6.25 uM	Target 1	75.309	3,484.003
+72	F12	MproS284A 6.25 uM	Target 1	78.971	3,860.958
+72	F12	MproS284A 6.25 uM	Target 1	61.005	-1,395.635
+72	F12	MproS284A 6.25 uM	Target 1	81.088	3,556.014
+76	G4	MproN214A 3.1 uM	Target 1	92.674	3,042.264
+76	G4	MproN214A 3.1 uM	Target 1	88.163	3,157.456
+76	G4	MproN214A 3.1 uM	Target 1	82.796	3,152.777
+76	G4	MproN214A 3.1 uM	Target 1	70.862	2,761.683
+76	G4	MproN214A 3.1 uM	Target 1	79.541	3,032.394
+77	G5	MproN214A 3.1 uM	Target 1	69.758	2,440.384
+77	G5	MproN214A 3.1 uM	Target 1	91.729	3,651.550
+77	G5	MproN214A 3.1 uM	Target 1	75.479	2,577.450
+77	G5	MproN214A 3.1 uM	Target 1	84.406	3,028.795
+77	G5	MproN214A 3.1 uM	Target 1	88.811	3,459.430
+78	G6	MproN214A 3.1 uM	Target 1	93.961	3,128.912
+78	G6	MproN214A 3.1 uM	Target 1	87.038	3,156.052
+78	G6	MproN214A 3.1 uM	Target 1	79.485	2,730.926
+78	G6	MproN214A 3.1 uM	Target 1	84.463	2,982.042
+78	G6	MproN214A 3.1 uM	Target 1	73.191	2,400.180
+79	G7	MproS284A 3.1 uM	Target 1	70.539	2,674.619
+79	G7	MproS284A 3.1 uM	Target 1	75.572	2,758.700
+79	G7	MproS284A 3.1 uM	Target 1	79.690	2,677.048
+79	G7	MproS284A 3.1 uM	Target 1	89.356	3,498.759
+79	G7	MproS284A 3.1 uM	Target 1	85.124	3,293.731
+80	G8	MproS284A 3.1 uM	Target 1	93.474	3,509.966
+80	G8	MproS284A 3.1 uM	Target 1	68.766	2,438.772
+80	G8	MproS284A 3.1 uM	Target 1	89.814	3,469.416
+80	G8	MproS284A 3.1 uM	Target 1	86.382	3,724.461
+80	G8	MproS284A 3.1 uM	Target 1	83.808	3,490.964
+81	G9	MproS284A 3.1 uM	Target 1	77.695	3,456.929
+81	G9	MproS284A 3.1 uM	Target 1	81.580	3,419.380
+81	G9	MproS284A 3.1 uM	Target 1	63.925	1,457.627
+81	G9	MproS284A 3.1 uM	Target 1	90.837	3,427.020
+81	G9	MproS284A 3.1 uM	Target 1	80.323	3,307.665
+82	G10	MproS284A 3.1 uM	Target 1	69.353	2,777.367
+82	G10	MproS284A 3.1 uM	Target 1	85.294	3,721.430
+82	G10	MproS284A 3.1 uM	Target 1	78.780	3,581.690
+82	G10	MproS284A 3.1 uM	Target 1	90.894	3,526.731
+82	G10	MproS284A 3.1 uM	Target 1	87.637	3,667.305
+83	G11	MproS284A 3.1 uM	Target 1	93.790	3,014.816
+83	G11	MproS284A 3.1 uM	Target 1	90.357	3,982.574
+83	G11	MproS284A 3.1 uM	Target 1	67.700	2,833.815
+83	G11	MproS284A 3.1 uM	Target 1	83.034	3,737.930
+83	G11	MproS284A 3.1 uM	Target 1	86.695	3,853.257
+84	G12	MproS284A 3.1 uM	Target 1	69.759	3,534.365
+84	G12	MproS284A 3.1 uM	Target 1	65.926	2,965.471
+84	G12	MproS284A 3.1 uM	Target 1	60.948	212.458
+84	G12	MproS284A 3.1 uM	Target 1	74.737	4,203.145
+84	G12	MproS284A 3.1 uM	Target 1	93.619	3,431.971
+88	H4	MproN214A 1.6 uM	Target 1	79.655	1,796.490
+88	H4	MproN214A 1.6 uM	Target 1	92.274	1,712.179
+88	H4	MproN214A 1.6 uM	Target 1	73.717	1,500.786
+88	H4	MproN214A 1.6 uM	Target 1	81.825	1,529.554
+88	H4	MproN214A 1.6 uM	Target 1	86.336	1,743.703
+89	H5	MproN214A 1.6 uM	Target 1	89.841	2,257.990
+90	H6	MproN214A 1.6 uM	Target 1	82.288	1,923.213
+90	H6	MproN214A 1.6 uM	Target 1	73.992	893.847
+90	H6	MproN214A 1.6 uM	Target 1	87.324	1,926.374
+90	H6	MproN214A 1.6 uM	Target 1	92.187	1,782.114
+90	H6	MproN214A 1.6 uM	Target 1	80.057	1,319.070
+91	H7	MproQ256A 1.6 uM	Target 1	91.186	3,446.640
+91	H7	MproQ256A 1.6 uM	Target 1	93.302	1,882.255
+91	H7	MproQ256A 1.6 uM	Target 1	27.873	869.263
+91	H7	MproQ256A 1.6 uM	Target 1	89.070	2,041.984
+91	H7	MproQ256A 1.6 uM	Target 1	75.973	1,397.378
+92	H8	MproQ256A 1.6 uM	Target 1	85.009	2,263.412
+92	H8	MproQ256A 1.6 uM	Target 1	75.458	1,088.951
+92	H8	MproQ256A 1.6 uM	Target 1	77.517	1,419.810
+92	H8	MproQ256A 1.6 uM	Target 1	29.474	185.658
+92	H8	MproQ256A 1.6 uM	Target 1	65.792	825.344
+93	H9	MproQ256A 1.6 uM	Target 1	66.610	861.501
+93	H9	MproQ256A 1.6 uM	Target 1	68.267	933.619
+93	H9	MproQ256A 1.6 uM	Target 1	73.809	1,113.539
+93	H9	MproQ256A 1.6 uM	Target 1	70.838	1,000.157
+93	H9	MproQ256A 1.6 uM	Target 1	75.466	1,130.458
+94	H10	MproS284A 1.6 uM	Target 1	83.923	2,077.306
+94	H10	MproS284A 1.6 uM	Target 1	76.266	2,544.796
+94	H10	MproS284A 1.6 uM	Target 1	89.065	1,942.320
+94	H10	MproS284A 1.6 uM	Target 1	78.323	1,991.143
+94	H10	MproS284A 1.6 uM	Target 1	44.383	238.103
+95	H11	MproS284A 1.6 uM	Target 1	91.273	2,214.923
+95	H11	MproS284A 1.6 uM	Target 1	71.819	2,186.695
+95	H11	MproS284A 1.6 uM	Target 1	76.282	1,566.001
+95	H11	MproS284A 1.6 uM	Target 1	88.469	2,125.152
+95	H11	MproS284A 1.6 uM	Target 1	69.759	1,518.817
+96	H12	MproS284A 1.6 uM	Target 1	76.454	2,548.016
+96	H12	MproS284A 1.6 uM	Target 1	72.334	2,137.845
+96	H12	MproS284A 1.6 uM	Target 1	88.755	1,952.400
+96	H12	MproS284A 1.6 uM	Target 1	86.352	1,940.915
+96	H12	MproS284A 1.6 uM	Target 1	83.148	2,077.141
