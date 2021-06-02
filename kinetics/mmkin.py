@@ -17,14 +17,12 @@ class KineticsSeries:
         * E_0: the initial enzyme concentration
         * S_0: the initial substrate concentration
         * dt:  the time delay between each data point
-        * cntrl_i: the intensity of a well with no enzyme (S_0 intensity)
-        * blank_i: the intensity of a well with nothing
         
     Data are "indexed" by E_0 and S_0 and accessing them in this
     way is likely to be useful.
     """
     
-    def __init__(self, yaml_file, prefix='', sumfxn=np.median):
+    def __init__(self, yaml_file, prefix='', corrections=None, sumfxn=np.median):
         
         # _datasets is the main "under the hood" data structure
         # it maps : (protein_conc, substrate_conc) -->
@@ -32,14 +30,23 @@ class KineticsSeries:
         #                { timeseries, dt, cntrl_i, blank_i }, 
         #                ..., 
         #              ]
+
         self._datasets = {}
         self._sumfxn = sumfxn
-   
+
+
+        # >> load corrections
+        if corrections:
+            corr_file = open(corrections, 'r')
+            self._corrections = yaml.safe_load(corr_file)
+        else:
+            self._corrections = {}
+
+
+        # >> load kinetics data
         if type(yaml_file) is str:
             yaml_file = open(yaml_file, 'r')
         self._yaml = yaml.safe_load(yaml_file)
-
-        #pprint(self._yaml)
         
         for data_file in self._yaml.keys():
             print('Loading: %s...' % data_file)
@@ -56,9 +63,52 @@ class KineticsSeries:
                                )
         
         return
+
+
+    def _rfu_to_conc(self, s_conc_uM, blank_i, dt, timeseries):
+        """
+        """
+
+        # subtract blank
+        if self._corrections.get('zero_mode', None):
+            zero_mode = True
+            timeseries = timeseries - timeseries[0]
+        else:
+            timeseries = timeseries - blank_i
+
+        # baseline correction
+        if self._corrections.get('baseline_correction', None):
+            m = self._corrections['baseline_correction'].get(s_conc_uM, 0.0)
+            if m == 0.0:
+                print(' ! Warning, baseline corr for [S]=%f not found!' % s_conc_uM)
+            bl = m * dt * np.arange(len(timeseries))
+            timeseries = timeseries + bl
+        
+        # convert to concentration
+        if self._corrections.get('rfu_to_conc', None):
+            
+            mdl = self._corrections['rfu_to_conc']['model']
+
+            if mdl == 'powerlaw':
+                p_line = self._corrections['rfu_to_conc']['params']
+                params = np.array([float(e) for e in p_line])
+                if zero_mode:
+                    params[4] = 0.0
+                ts_uM = _powerlaw(timeseries, s_conc_uM, *params)
+            else:
+                raise ValueError('rfu_to_conc::model = `%s` not implemented' % mdl)
+
+        else: # no RFU --> conc info
+            ts_uM = timeseries
+
+        return ts_uM
     
 
     def _load_data(self, file_path, p_conc_uM, s_conc_uM, gain, blank, dt_s, exclude):
+
+        if gain != 1400.0:
+            print(' !!! CRITICAL WARNING !!! ')
+            print(' GAIN: %f != 1400 !!!!!!! ' % gain)
 
         if (len(p_conc_uM) != 12) or (len(s_conc_uM) != 8):
             raise ValueError('include all 12 cols and 8 rows in data entry!',
@@ -71,17 +121,12 @@ class KineticsSeries:
                 
                 k = (p, s)
 
-                # -1 is no data, 0 means no protein (control)
-                if (s == -1) or (p == -1): #or (p == 0):
+                # -1 is no data
+                if (s == -1) or (p == -1):
                     continue
                
-                if 0 in p_conc_uM:
-                    cntrl_idx = int(np.where(p_conc_uM == 0)[0])
-                    cntrl_i   = self._sumfxn(data_block[:,i,cntrl_idx])
-                else:
-                    cntrl_i   = 0.0
-                
-                ts = data_block[:,i,j] / gain
+                # >> load the data, and mark any flagged entries
+                ts = data_block[:,i,j]
                 if np.any(np.isnan(ts)):
                     print(p, s, ts)
                     raise ValueError('nan in data -- did you label them correctly?')
@@ -92,11 +137,14 @@ class KineticsSeries:
                 else:
                     exclude_entry = False
 
+                # >> correct the data & convert from RFU to [P]
+                blank_i = self._sumfxn(data_block[:,int(blank[0])-1,int(blank[1])-1])
+                ts_in_uM = self._rfu_to_conc(s, blank_i, dt_s, ts)
+
+                # >> build final dictionary to hold data
                 entry = {
-                    'timeseries': ts,
+                    'timeseries': ts_in_uM,
                     'dt':         dt_s,
-                    'cntrl_i':    cntrl_i,
-                    'blank_i':    self._sumfxn(data_block[:,int(blank[0])-1,int(blank[1])-1]),
                     'exclude':    exclude_entry,
                 }
                 
@@ -126,7 +174,7 @@ class KineticsSeries:
         return list(self._datasets.keys())
 
 
-    def fit_v0(self, r2_threshold=0.0, corrections=None, **kwargs):
+    def fit_v0(self, r2_threshold=0.0, **kwargs):
 
         for k in self.all_conditions:
             for e in self.get(*k):
@@ -138,10 +186,6 @@ class KineticsSeries:
                 e['b']         = b
                 e['stderr_v0'] = stderr_v0
                 e['r2']        = r2
-
-                if corrections:
-                    if k[1] in corrections.keys(): # keyed by [S]
-                        e['v0'] += corrections[ k[1] ]
 
                 if r2 < r2_threshold:
                     e['exclude'] = True
@@ -164,9 +208,6 @@ class KineticsSeries:
             
         cntrl_i : float
             the relevant control intensity
-
-        blank_i : float
-            relevant blank intensity
         """
         k = (prot_c, subs_c)
         if k in self._datasets.keys():
@@ -206,7 +247,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s)
 
 
-def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, regions=None,
+def fit_linear_v0(timeseries, dt=1.0, regions=None,
                   **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
@@ -220,12 +261,6 @@ def fit_linear_v0(timeseries, dt=1.0, blank_i=0.0, regions=None,
     dt : float
         the time spacing, in seconds
 
-    cntrl_i : float
-        the relevant control intensity
-
-    blank_i : float
-        relevant blank intensity
-        
     regions : int or list of ints
         the first N data points to fit (linear region), if None
         or list will scan a set an choose the best
@@ -357,6 +392,22 @@ def fit_haldane(v0s, substrate_concs, enzyme_conc):
 def haldane(E_0, S, k_cat, K_m, K_i):
 	V = (E_0 * k_cat * S) / (K_m + S + np.square(S) / K_i)
 	return V
+
+
+def _powerlaw(ts, S, a, b, c, d, e):
+    """
+    Power law model for the inner filter effect:
+
+        f = (a*S^b + c) * P + d*S + e
+
+    This function takes a timeseries `ts` in RFU ("f" in eqn above) and
+    converts it into concentration of product ("P"), accounting for the
+    linear filter effect of the substrate "S".
+    """
+
+    ts_uM = (ts - d*S - e) / (a*np.power(S,b) + c)
+
+    return ts_uM
 
 
 if __name__ == '__main__': 

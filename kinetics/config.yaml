@@ -1,0 +1,19 @@
+
+# set the first timeseries datapoint to zero
+zero_mode: True
+
+# units: RFU / s, this is added
+baseline_correction:
+  320.0: 0.059
+  160.0: 0.099
+  80.0:  0.107
+  40.0:  0.089
+  20.0:  0.046
+  10.0:  0.029
+  5.0:   0.009
+
+rfu_to_conc:
+  model:  'powerlaw'
+  params: [-2.586e+04, 7.897e-02, 4.786e+04, -3.463e+00, 7.765e+04]
+
+
