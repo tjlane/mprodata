@@ -190,8 +190,12 @@ class KineticsSeries:
                 if r2 < r2_threshold:
                     e['exclude'] = True
 
-                if e['v0'] < 0.0:
+                if e['v0'] < - 1e-2:
+                    print('ds exluded due to poor fit, v0:', e['v0'])
                     e['exclude'] = True
+                elif e['v0'] < 0.0:
+                    print('ds between v0 -1e-2 and 0.0, set to zero')
+                    e['v0'] = 0.0
 
         return
 
@@ -220,11 +224,13 @@ class KineticsSeries:
     def get_v0s(self, prot_c, subs_c):
         
         v0s = []
+        v0errs = []
         for e in self.get(prot_c, subs_c):
             if 'v0' in e.keys() and (not e['exclude']):
                 v0s.append(e['v0'])
+                v0errs.append(e['stderr_v0'])
 
-        return np.array(v0s)
+        return np.array(v0s), np.array(v0errs)
 
 
     def get_set_v0s(self, prot_cs, subs_cs):
@@ -235,16 +241,18 @@ class KineticsSeries:
         ss  = []
         ps  = []
         v0s = []
+        v0errs = []
 
         for i,s in enumerate(subs_cs):
             for j,p in enumerate(prot_cs):
 
-                v = self.get_v0s(p, s)
+                v, verr = self.get_v0s(p, s)
                 ss.extend( [s,] * len(v) )
                 ps.extend( [p,] * len(v) )
                 v0s.extend(v)
+                v0errs.extend(verr)
 
-        return np.array(ss), np.array(ps), np.array(v0s)
+        return np.array(ss), np.array(ps), np.array(v0s), np.array(v0errs)
 
 
 def fit_linear_v0(timeseries, dt=1.0, regions=None,
@@ -284,7 +292,7 @@ def fit_linear_v0(timeseries, dt=1.0, regions=None,
     x = np.arange(N) * dt
 
     if regions is None:
-        regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8])
+        regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8]) # 9/11 rm'd 16, 8
     elif type(regions) is int:
         regions = [regions]
     elif type(regions) is list:
@@ -306,7 +314,7 @@ def fit_linear_v0(timeseries, dt=1.0, regions=None,
     return v0, b, stderr_v0, r2
     
 
-def fit_mm(v0s, substrate_concs, enzyme_conc):
+def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
     """
     Non-linear LSQ fit of the Michaelis-Mentin equation:
     
@@ -329,16 +337,16 @@ def fit_mm(v0s, substrate_concs, enzyme_conc):
     K_m : float
     """
     
-    S = np.array(substrate_concs)
-    
-    def mm(tup):
-        k_cat, K_m = tup
-        V = (enzyme_conc * k_cat * S) / (K_m + S)
-        return V - v0s
-    
-    res = optimize.least_squares(mm, x0=(1.0, 1.0))
-    
-    return res['x']
+    x = np.array(substrate_concs)
+
+    def mm(S, k_cat, K_m):
+        return (enzyme_conc * k_cat * S) / (K_m + S)
+
+    popt, pcov = optimize.curve_fit(mm, x, v0s, sigma=v0errs,
+                                    absolute_sigma=True)
+    perr = np.sqrt(np.diag(pcov))
+
+    return popt, perr
 
 
 def mm(E_0, S, k_cat, K_m):
