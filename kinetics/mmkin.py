@@ -128,7 +128,6 @@ class KineticsSeries:
                 # >> load the data, and mark any flagged entries
                 ts = data_block[:,i,j]
                 if np.any(np.isnan(ts)):
-                    print(p, s, ts)
                     raise ValueError('nan in data -- did you label them correctly?')
               
                 if [i+1, j+1] in exclude:
@@ -181,6 +180,11 @@ class KineticsSeries:
 
                 e.update(kwargs)
 
+                # fit fewer data points for higher protein concentrations
+                # >> faster kinetics = smaller linear region
+                if k[0] > 0.0:
+                    e['fit_region'] = min(10 * int(160.0 / k[0]), 64)
+
                 v0, b, stderr_v0, r2 = fit_linear_v0(**e)
                 e['v0']        = v0
                 e['b']         = b
@@ -194,7 +198,7 @@ class KineticsSeries:
                     print('ds exluded due to poor fit, v0:', e['v0'])
                     e['exclude'] = True
                 elif e['v0'] < 0.0:
-                    print('ds between v0 -1e-2 and 0.0, set to zero')
+                    #print('ds between v0 -1e-2 and 0.0, set to zero')
                     e['v0'] = 0.0
 
         return
@@ -255,7 +259,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s), np.array(v0errs)
 
 
-def fit_linear_v0(timeseries, dt=1.0, regions=None,
+def fit_linear_v0(timeseries, dt=1.0, fit_region=None,
                   **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
@@ -269,9 +273,8 @@ def fit_linear_v0(timeseries, dt=1.0, regions=None,
     dt : float
         the time spacing, in seconds
 
-    regions : int or list of ints
-        the first N data points to fit (linear region), if None
-        or list will scan a set an choose the best
+    fit_region : int
+        the first N data points to fit (linear region)
         
     Returns
     -------
@@ -291,28 +294,15 @@ def fit_linear_v0(timeseries, dt=1.0, regions=None,
     N = len(timeseries)
     x = np.arange(N) * dt
 
-    if regions is None:
-        regions = np.array([4096, 2048, 1024, 528, 256, 128, 64, 32, 16, 8]) # 9/11 rm'd 16, 8
-    elif type(regions) is int:
-        regions = [regions]
-    elif type(regions) is list:
-        pass
-    else:
-        raise TypeError()
-
-    r2s = []
-    for fit_region in regions:
-
-        v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
-        r2s.append( r ** 2 )
-
-    best = np.argmax(r2s)
-    fit_region = regions[best]
     v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
     r2 = r ** 2
 
     return v0, b, stderr_v0, r2
-    
+
+
+def mm(E_0, S, k_cat, K_m):
+    return (E_0 * k_cat * S) / (K_m + S)
+
 
 def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
     """
@@ -339,18 +329,19 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
     
     x = np.array(substrate_concs)
 
-    def mm(S, k_cat, K_m):
+    def mm_closure(S, k_cat, K_m):
         return (enzyme_conc * k_cat * S) / (K_m + S)
 
-    popt, pcov = optimize.curve_fit(mm, x, v0s, sigma=v0errs,
+    popt, pcov = optimize.curve_fit(mm_closure, x, v0s, sigma=v0errs,
                                     absolute_sigma=True)
     perr = np.sqrt(np.diag(pcov))
 
     return popt, perr
 
 
-def mm(E_0, S, k_cat, K_m):
-    return (E_0 * k_cat * S) / (K_m + S)
+def haldane(E_0, S, k_cat, K_m, K_i):
+    V = (E_0 * k_cat * S) / (K_m + S + np.square(S) / K_i)
+    return V
 
 
 def fit_haldane(v0s, substrate_concs, enzyme_conc):
@@ -386,20 +377,46 @@ def fit_haldane(v0s, substrate_concs, enzyme_conc):
     S = np.array(substrate_concs)
     E = np.array(enzyme_conc)
 
-    def h_simple(tup):
+    def h_closure(tup):
         k_cat, K_m, K_i = tup
         V = (E * k_cat * S) / (K_m + S + np.square(S) / K_i)
         return V - v0s
 
-    res = optimize.least_squares(h_simple, x0=(0.01, 10.0, 1.0),
+    res = optimize.least_squares(h_closure, x0=(0.01, 10.0, 1.0),
              bounds=([0.0,]*3, [np.inf,]*3) )
 
     return res['x']
 
 
-def haldane(E_0, S, k_cat, K_m, K_i):
-	V = (E_0 * k_cat * S) / (K_m + S + np.square(S) / K_i)
-	return V
+def mm_dimer(E_0, S, k_cat_D, K_m_D, K_d):
+
+    # assumes no monomer activity
+
+    M = ( np.sqrt( 8.0*E_0 / K_d + 1 ) - 1 ) / (4.0 / K_d) 
+    half_D = E_0 - M
+    v0s_D = (half_D * k_cat_D * S) / (K_m_D + S)
+
+    return v0s_D
+
+
+def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
+    """
+    """
+
+    x = np.array(substrate_concs)
+
+    def mm_dimer_closure(S, k_cat_D, K_m_D, K_d):
+        y =  mm_dimer(enzyme_concs, S, k_cat_D, K_m_D, K_d)
+        return y
+
+    popt, pcov = optimize.curve_fit(mm_dimer_closure, x, v0s, 
+                                    bounds=[[ 0.0, ]*3,
+                                            [ np.inf,]*3 ],
+                                    sigma=v0errs,
+                                    absolute_sigma=True)
+    perr = np.sqrt(np.diag(pcov))
+
+    return popt, perr
 
 
 def _powerlaw(ts, S, a, b, c, d, e):

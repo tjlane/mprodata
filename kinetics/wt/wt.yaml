@@ -70,9 +70,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   
-   - [6, 4]
-   #- [2, 4]
+  exclude:   []
 
 210507_buffer_20µM_MproWT_N_Q_S.csv:
   p_conc_uM: [0.0, 20.0,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
@@ -80,7 +78,7 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   [] # 11/08 'all'
+  exclude:   'all'
 
 210507_10µM_MproWT_N_Q_S.csv:
   p_conc_uM: [-1, -1,  -1, -1, -1, 10.0, -1, -1, -1, -1, -1, -1]
@@ -88,4 +86,4 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   [] # 11/08 'all'
+  exclude:   'all'
