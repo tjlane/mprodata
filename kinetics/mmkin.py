@@ -173,7 +173,7 @@ class KineticsSeries:
         return list(self._datasets.keys())
 
 
-    def fit_v0(self, r2_threshold=0.0, **kwargs):
+    def fit_v0(self, r2_threshold=0.0, regions=8, **kwargs):
 
         for k in self.all_conditions:
             for e in self.get(*k):
@@ -182,8 +182,9 @@ class KineticsSeries:
 
                 # fit fewer data points for higher protein concentrations
                 # >> faster kinetics = smaller linear region
-                if k[0] > 0.0:
-                    e['fit_region'] = min(10 * int(160.0 / k[0]), 64)
+                if k[0] > 0.0: # k[0] = protein conc
+                    e['region_start'] = 4 * int(160.0 / k[0])
+                    #print(k[0], e['region_start'])
 
                 v0, b, stderr_v0, r2 = fit_linear_v0(**e)
                 e['v0']        = v0
@@ -259,7 +260,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s), np.array(v0errs)
 
 
-def fit_linear_v0(timeseries, dt=1.0, fit_region=None,
+def fit_linear_v0(timeseries, dt=1.0, region_start=4,
                   **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
@@ -293,8 +294,15 @@ def fit_linear_v0(timeseries, dt=1.0, fit_region=None,
     
     N = len(timeseries)
     x = np.arange(N) * dt
+    
+    fin = (0.0, 0.0, 0.0, 0.0, 0.0)
+    fit_regions = [ region_start * (2 ** i) for i in range(8) ]
+    for fit_region in fit_regions:
+        res = linregress(x[:fit_region], timeseries[:fit_region])
+        if res[0] > fin[0]:
+            fin = res
 
-    v0, b, r, p, stderr_v0 = linregress(x[:fit_region], timeseries[:fit_region])
+    v0, b, r, p, stderr_v0 = fin
     r2 = r ** 2
 
     return v0, b, stderr_v0, r2
@@ -329,11 +337,18 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
     
     x = np.array(substrate_concs)
 
+    if np.any(v0errs):
+        absolute_sigma = True
+    else:
+        absolute_sigma = False
+
     def mm_closure(S, k_cat, K_m):
         return (enzyme_conc * k_cat * S) / (K_m + S)
 
-    popt, pcov = optimize.curve_fit(mm_closure, x, v0s, sigma=v0errs,
-                                    absolute_sigma=True)
+    popt, pcov = optimize.curve_fit(mm_closure, x, v0s, 
+                                    p0=(0.1, 1.0),
+                                    sigma=v0errs,
+                                    absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
 
     return popt, perr
@@ -400,8 +415,11 @@ def mm_dimer(E_0, S, k_cat_D, K_m_D, K_d):
 
 
 def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
-    """
-    """
+
+    if np.any(v0errs):
+        absolute_sigma = True
+    else:
+        absolute_sigma = False
 
     x = np.array(substrate_concs)
 
@@ -413,7 +431,7 @@ def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
                                     bounds=[[ 0.0, ]*3,
                                             [ np.inf,]*3 ],
                                     sigma=v0errs,
-                                    absolute_sigma=True)
+                                    absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
 
     return popt, perr

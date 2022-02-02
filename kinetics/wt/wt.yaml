@@ -70,7 +70,9 @@
   blank:     [8, 12]
   dt_s:      15.0
   gain:      1400.0
-  exclude:   []
+  exclude:   
+   - [2,2]
+   #- [1,3]
 
 210507_buffer_20µM_MproWT_N_Q_S.csv:
   p_conc_uM: [0.0, 20.0,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
