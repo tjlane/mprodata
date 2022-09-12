@@ -127,9 +127,13 @@ class KineticsSeries:
                
                 # >> load the data, and mark any flagged entries
                 ts = data_block[:,i,j]
+
                 if np.any(np.isnan(ts)):
                     raise ValueError('nan in data -- did you label them correctly?')
               
+                if len(ts) == 0:
+                    raise ValueError('zero len data -- did you label them correctly?')
+
                 if [i+1, j+1] in exclude:
                     print(' ... excluding E=%.2f / S=%.2f' % (p, s))
                     exclude_entry = True
@@ -183,7 +187,7 @@ class KineticsSeries:
                 # fit fewer data points for higher protein concentrations
                 # >> faster kinetics = smaller linear region
                 if k[0] > 0.0: # k[0] = protein conc
-                    e['region_start'] = 4 * int(160.0 / k[0])
+                    e['region_start'] = max(4, 4 * int(160.0 / k[0]))
                     #print(k[0], e['region_start'])
 
                 v0, b, stderr_v0, r2 = fit_linear_v0(**e)
@@ -293,6 +297,11 @@ def fit_linear_v0(timeseries, dt=1.0, region_start=4,
     """
     
     N = len(timeseries)
+    assert N > 0, 'empty timeseries'
+
+    if region_start < 1:
+        raise RuntimeError('region_start must be >= 1')
+
     x = np.arange(N) * dt
     
     fin = (0.0, 0.0, 0.0, 0.0, 0.0)
@@ -428,8 +437,8 @@ def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
         return y
 
     popt, pcov = optimize.curve_fit(mm_dimer_closure, x, v0s, 
-                                    bounds=[[ 0.0, ]*3,
-                                            [ np.inf,]*3 ],
+                                    bounds=[[ 0.0,    0.0,    0.0    ],
+                                            [ np.inf, np.inf, np.inf ] ],
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
