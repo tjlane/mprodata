@@ -441,9 +441,10 @@ def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
                                             [ np.inf, np.inf, np.inf ] ],
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
-    perr = np.sqrt(np.diag(pcov))
+    
+    sem = np.sqrt(np.diag(pcov)) / np.sqrt(len(v0s))
 
-    return popt, perr
+    return popt, sem
 
 
 def _powerlaw(ts, S, a, b, c, d, e):
