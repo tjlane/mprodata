@@ -1,6 +1,6 @@
 
 crystal_structures/
-
+*.pdb
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
