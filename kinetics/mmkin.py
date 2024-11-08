@@ -177,7 +177,7 @@ class KineticsSeries:
         return list(self._datasets.keys())
 
 
-    def fit_v0(self, r2_threshold=0.0, regions=8, **kwargs):
+    def fit_v0(self, r2_threshold=0.0, **kwargs):
 
         for k in self.all_conditions:
             for e in self.get(*k):
@@ -207,21 +207,27 @@ class KineticsSeries:
                     e['v0'] = 0.0
 
         return
+    
+
+    def get_fit_v0_as_json(self):
+        payload = []
+        for k in self.all_conditions:
+            for e in self.get(*k):
+                payload.append(
+                    {
+                        "[E] (µM)": k[0] / 20.0,
+                        "[S] (µM)": k[1],
+                        "v0 (µM/s)": e["v0"],
+                        "intercept (µM)": e["b"],
+                        "stderr_v0 (µM/s)": e["stderr_v0"],
+                        "r_squared_fit": e["r2"],
+                    }
+                )
+        return payload
+
 
     
     def get(self, prot_c, subs_c):
-        """
-        Returns
-        -------         
-        timeseries : np.ndarray
-            time series data
-            
-        dt : float
-            the time spacing, in seconds
-            
-        cntrl_i : float
-            the relevant control intensity
-        """
         k = (prot_c, subs_c)
         if k in self._datasets.keys():
             ret = self._datasets[k]
@@ -252,8 +258,8 @@ class KineticsSeries:
         v0s = []
         v0errs = []
 
-        for i,s in enumerate(subs_cs):
-            for j,p in enumerate(prot_cs):
+        for s in subs_cs:
+            for p in prot_cs:
 
                 v, verr = self.get_v0s(p, s)
                 ss.extend( [s,] * len(v) )
@@ -355,7 +361,7 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
         return (enzyme_conc * k_cat * S) / (K_m + S)
 
     popt, pcov = optimize.curve_fit(mm_closure, x, v0s, 
-                                    p0=(0.1, 1.0),
+                                    p0=(0.01, 100.0),
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
