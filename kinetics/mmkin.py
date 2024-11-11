@@ -458,7 +458,7 @@ def mm_third_order(E_0, S, k_cat, K_m):
     # 2M + S <> DS -> D + P
 
     x = 4. * E_0 + K_m / S
-    DS = (x + np.sqrt( np.square(x) - 16. * np.square(E_0))) / 8.
+    DS = (x - np.sqrt( np.square(x) - 16. * np.square(E_0))) / 8.
     v0s = k_cat * DS
 
     return v0s
@@ -480,6 +480,7 @@ def fit_mm_third_order(v0s, substrate_concs, enzyme_concs, v0errs=None):
     popt, pcov = optimize.curve_fit(mm_third_order_closure, x, v0s, 
                                     bounds=[[ 0.0,    0.0,  ],
                                             [ np.inf, np.inf] ],
+                                    p0=(0.02, 2000.0),
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
     
