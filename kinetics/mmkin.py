@@ -453,6 +453,41 @@ def fit_mm_dimer(v0s, substrate_concs, enzyme_concs, v0errs=None):
     return popt, perr
 
 
+def mm_third_order(E_0, S, k_cat, K_m):
+
+    # 2M + S <> DS -> D + P
+
+    x = 4. * E_0 + K_m / S
+    DS = (x + np.sqrt( np.square(x) - 16. * np.square(E_0))) / 8.
+    v0s = k_cat * DS
+
+    return v0s
+
+
+def fit_mm_third_order(v0s, substrate_concs, enzyme_concs, v0errs=None):
+
+    if np.any(v0errs):
+        absolute_sigma = True
+    else:
+        absolute_sigma = False
+
+    x = np.array(substrate_concs)
+
+    def mm_third_order_closure(S, k_cat_D, K_m_D):
+        y =  mm_third_order(enzyme_concs, S, k_cat_D, K_m_D)
+        return y
+
+    popt, pcov = optimize.curve_fit(mm_third_order_closure, x, v0s, 
+                                    bounds=[[ 0.0,    0.0,  ],
+                                            [ np.inf, np.inf] ],
+                                    sigma=v0errs,
+                                    absolute_sigma=absolute_sigma)
+    
+    perr = np.sqrt(np.diag(pcov))
+
+    return popt, perr
+
+
 def _powerlaw(ts, S, a, b, c, d, e):
     """
     Power law model for the inner filter effect:
