@@ -418,13 +418,22 @@ def fit_haldane(v0s, substrate_concs, enzyme_conc):
     return res['x']
 
 
-def mm_dimer(E_0, S, k_cat_D, K_m_D, K_d):
+def mm_dimer(E_0, S, k_cat_D, K_m_D, K_d, MD_equilibration="slow"):
 
     # assumes no monomer activity
 
-    M = ( np.sqrt( 8.0*E_0 / K_d + 1 ) - 1 ) / (4.0 / K_d) 
-    half_D = E_0 - M
-    v0s_D = (half_D * k_cat_D * S) / (K_m_D + S)
+    # slow M/D equilibration
+    if MD_equilibration == "slow":
+        M = ( np.sqrt( 8.0*E_0 / K_d + 1 ) - 1 ) / (4.0 / K_d) 
+        half_D = E_0 - M
+        v0s_D = (half_D * k_cat_D * S) / (K_m_D + S)
+
+    # fast M/D equilibration
+    elif MD_equilibration == "fast":
+        alpha = (K_m_D + S) / (K_d * K_m_D)
+        M = 1. / (4. * alpha) * (np.sqrt(8. * alpha * E_0 + 1) - 1)
+        DS = E_0/2. - M/2. - np.square(M)/2.
+        v0s_D = k_cat_D * DS
 
     return v0s_D
 
