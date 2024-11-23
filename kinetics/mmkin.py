@@ -361,7 +361,7 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
         return (enzyme_conc * k_cat * S) / (K_m + S)
 
     popt, pcov = optimize.curve_fit(mm_closure, x, v0s, 
-                                    p0=(0.01, 100.0),
+                                    p0=(0.1, 10.0),
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
@@ -424,7 +424,7 @@ def mm_dimer(E_0, S, k_cat_D, K_m_D, K_d, MD_equilibration="slow"):
 
     # slow M/D equilibration
     if MD_equilibration == "slow":
-        M = ( np.sqrt( 8.0*E_0 / K_d + 1 ) - 1 ) / (4.0 / K_d) 
+        M = ( np.sqrt( 8.0*E_0 / K_d + 1 ) - 1 ) / (4.0 / K_d)
         half_D = E_0 - M
         v0s_D = (half_D * k_cat_D * S) / (K_m_D + S)
 
