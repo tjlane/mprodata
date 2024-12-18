@@ -270,8 +270,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s), np.array(v0errs)
 
 
-def fit_linear_v0(timeseries, dt=1.0, region_start=4,
-                  **kwargs):
+def fit_linear_v0(timeseries, dt=1.0, region_start=6, discard_first=1, **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
     fit a line to the initial (linear) part of the time series.
@@ -310,10 +309,14 @@ def fit_linear_v0(timeseries, dt=1.0, region_start=4,
 
     x = np.arange(N) * dt
     
+    # v0, intercept, R, p-value, stderr_v0
     fin = (0.0, 0.0, 0.0, 0.0, 0.0)
-    fit_regions = [ region_start * (2 ** i) for i in range(8) ]
+
+    fit_regions = [ region_start + i for i in range(128-region_start+1) ]
     for fit_region in fit_regions:
-        res = linregress(x[:fit_region], timeseries[:fit_region])
+        res = linregress(x[discard_first:discard_first+fit_region], timeseries[discard_first:discard_first+fit_region])
+
+        # pick the highest slope
         if res[0] > fin[0]:
             fin = res
 
@@ -361,8 +364,12 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
         return (enzyme_conc * k_cat * S) / (K_m + S)
 
     popt, pcov = optimize.curve_fit(mm_closure, x, v0s, 
-                                    p0=(0.1, 10.0),
+                                    p0=(0.01, 45.0),
                                     sigma=v0errs,
+                                    bounds=[
+                                        (0.0, 0.0),
+                                        (np.inf, np.inf)
+                                    ],
                                     absolute_sigma=absolute_sigma)
     perr = np.sqrt(np.diag(pcov))
 
@@ -489,7 +496,7 @@ def fit_mm_third_order(v0s, substrate_concs, enzyme_concs, v0errs=None):
     popt, pcov = optimize.curve_fit(mm_third_order_closure, x, v0s, 
                                     bounds=[[ 0.0,    0.0,  ],
                                             [ np.inf, np.inf] ],
-                                    p0=(0.02, 2000.0),
+                                    p0=(0.002, 2000.0),
                                     sigma=v0errs,
                                     absolute_sigma=absolute_sigma)
     
@@ -512,13 +519,3 @@ def _powerlaw(ts, S, a, b, c, d, e):
     ts_uM = (ts - d*S - e) / (a*np.power(S,b) + c)
 
     return ts_uM
-
-
-if __name__ == '__main__': 
-	ks = KineticsSeries(yaml_string, prefix='./wt')
-
-	print(ks.protein_concs)
-	print(ks.substrate_concs)
-	print(ks.all_conditions)
-	print(ks.get(2.0, 160.0))
-
