@@ -53,21 +53,20 @@ class KineticsSeries:
             if self._yaml[data_file]['exclude'] == 'all':
                 print(' ... excluded')
             else:
-                self._load_data(os.path.join(prefix, data_file),
-                                np.array(self._yaml[data_file]['p_conc_uM']),
-                                np.array(self._yaml[data_file]['s_conc_uM']),
-                                self._yaml[data_file]['gain'],
-                                np.array(self._yaml[data_file]['blank']),
-                                self._yaml[data_file]['dt_s'],
-                                self._yaml[data_file]['exclude']
-                               )
+                self._load_data(
+                    os.path.join(prefix, data_file),
+                    np.array(self._yaml[data_file]['p_conc_uM']),
+                    np.array(self._yaml[data_file]['s_conc_uM']),
+                    self._yaml[data_file]['gain'],
+                    np.array(self._yaml[data_file]['blank']),
+                    self._yaml[data_file]['dt_s'],
+                    self._yaml[data_file]['exclude']
+                )
         
         return
 
 
     def _rfu_to_conc(self, s_conc_uM, blank_i, dt, timeseries):
-        """
-        """
 
         # subtract blank
         if self._corrections.get('zero_mode', None):
@@ -95,6 +94,21 @@ class KineticsSeries:
                 if zero_mode:
                     params[4] = 0.0
                 ts_uM = _powerlaw(timeseries, s_conc_uM, *params)
+
+            elif mdl == 'lakowicz':
+                p_line = self._corrections['rfu_to_conc']['params']
+                params = np.array([float(e) for e in p_line])
+                if zero_mode:
+                    params[4] = 0.0
+                ts_uM = _modified_lakowicz(timeseries, s_conc_uM, *params)
+
+            elif mdl == 'polylinear':
+                p_line = self._corrections['rfu_to_conc']['params']
+                params = np.array([float(e) for e in p_line])
+                if not zero_mode:
+                    raise NotImplementedError()
+                ts_uM = _polylinear(timeseries, s_conc_uM, params)
+
             else:
                 raise ValueError('rfu_to_conc::model = `%s` not implemented' % mdl)
 
@@ -270,7 +284,7 @@ class KineticsSeries:
         return np.array(ss), np.array(ps), np.array(v0s), np.array(v0errs)
 
 
-def fit_linear_v0(timeseries, dt=1.0, region_start=6, discard_first=1, **kwargs):
+def fit_linear_v0(timeseries, dt=1.0, region_start=6, discard_first=0, **kwargs):
     """
     Given a 1-d numpy array that represents fluorescence-vs-time,
     fit a line to the initial (linear) part of the time series.
@@ -518,4 +532,14 @@ def _powerlaw(ts, S, a, b, c, d, e):
 
     ts_uM = (ts - d*S - e) / (a*np.power(S,b) + c)
 
+    return ts_uM
+
+
+def _modified_lakowicz(ts, S, a, b, c, d):
+    ts_uM = (ts - d) / (c * np.exp(a*(S**b)))
+    return ts_uM
+
+
+def _polylinear(ts, S, polycoefs):
+    ts_uM = ts / np.polyval(polycoefs, S)
     return ts_uM

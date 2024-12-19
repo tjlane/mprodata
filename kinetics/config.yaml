@@ -15,5 +15,3 @@ baseline_correction:
 rfu_to_conc:
   model:  'powerlaw'
   params: [-2.586e+04, 7.897e-02, 4.786e+04, -3.463e+00, 7.765e+04]
-
-
