@@ -3,6 +3,7 @@
 zero_mode: True
 
 # units: RFU / s, this is added
+use_baseline_correction: False
 baseline_correction:
   320.0: 0.059
   160.0: 0.099

@@ -76,7 +76,7 @@ class KineticsSeries:
             timeseries = timeseries - blank_i
 
         # baseline correction
-        if self._corrections.get('baseline_correction', None):
+        if self._corrections.get('use_baseline_correction', False):
             m = self._corrections['baseline_correction'].get(s_conc_uM, 0.0)
             if m == 0.0:
                 print(' ! Warning, baseline corr for [S]=%f not found!' % s_conc_uM)
@@ -99,7 +99,7 @@ class KineticsSeries:
                 p_line = self._corrections['rfu_to_conc']['params']
                 params = np.array([float(e) for e in p_line])
                 if zero_mode:
-                    params[4] = 0.0
+                    raise NotImplementedError()
                 ts_uM = _modified_lakowicz(timeseries, s_conc_uM, *params)
 
             elif mdl == 'polylinear':
@@ -107,6 +107,13 @@ class KineticsSeries:
                 params = np.array([float(e) for e in p_line])
                 if not zero_mode:
                     raise NotImplementedError()
+                ts_uM = _polylinear(timeseries, s_conc_uM, params)
+
+            elif mdl == 'huyke':
+                p_line = self._corrections['rfu_to_conc']['params']
+                params = np.array([float(e) for e in p_line])
+                if not zero_mode:
+                    params[4] = 0.0
                 ts_uM = _polylinear(timeseries, s_conc_uM, params)
 
             else:
@@ -340,8 +347,8 @@ def fit_linear_v0(timeseries, dt=1.0, region_start=6, discard_first=0, **kwargs)
     return v0, b, stderr_v0, r2
 
 
-def mm(E_0, S, k_cat, K_m):
-    return (E_0 * k_cat * S) / (K_m + S)
+def mm(E_0, S, k_cat, k_sp):
+    return (E_0 * k_sp * S) / (1 + k_sp * S / k_cat)
 
 
 def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
@@ -360,11 +367,6 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
         
     enzyme_conc: float
         the total enzyme concentration
-    
-    Returns
-    -------    
-    k_cat : float
-    K_m : float
     """
     
     x = np.array(substrate_concs)
@@ -374,11 +376,11 @@ def fit_mm(v0s, substrate_concs, enzyme_conc, v0errs=None):
     else:
         absolute_sigma = False
 
-    def mm_closure(S, k_cat, K_m):
-        return (enzyme_conc * k_cat * S) / (K_m + S)
+    def mm_closure(S, k_cat, k_sp):
+        return (enzyme_conc * k_sp * S) / (1 + k_sp * S / k_cat)
 
     popt, pcov = optimize.curve_fit(mm_closure, x, v0s, 
-                                    p0=(0.01, 45.0),
+                                    p0=(0.01, 0.01),
                                     sigma=v0errs,
                                     bounds=[
                                         (0.0, 0.0),
@@ -543,3 +545,7 @@ def _modified_lakowicz(ts, S, a, b, c, d):
 def _polylinear(ts, S, polycoefs):
     ts_uM = ts / np.polyval(polycoefs, S)
     return ts_uM
+
+
+def _huyke(ts, S, a, b, c, d, e):
+    return ((ts - e) * np.exp(c * S) - a * S) / b
